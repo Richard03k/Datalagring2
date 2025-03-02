@@ -2,6 +2,8 @@
 using System.Text.Json;
 using System.IO;
 using System.Text.RegularExpressions;
+using System;
+using System.Xml.Linq;
 
 namespace CSharpConsole
 {
@@ -9,128 +11,94 @@ namespace CSharpConsole
     {
         private List<Kontakter> _contacts = new List<Kontakter>();
 
-        public async void AddContact(string Name, string SecondName, string Email, string PhoneNumber, string Street, string PostNumber, string City, Guid Id)
+        public async void AddContact(string Name, string SecondName, string Email, string PhoneNumber, string Street, string PostNumber, string City)
         {
-            var temp = _contacts.Any(contact => contact.ID == Id);
-            if (temp == false)
+            using (var context = new DataBase()) // Connect to the database
             {
-                var Kontakt = new Kontakter(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City, Id);
-                _contacts.Add(Kontakt);
-                //Console.WriteLine($"Kontakt skapad {Kontakt}");
+                if (context.Contacts.Any(c => c.Epostadress == Email)) // Check for duplicates
+                {
+                    Console.WriteLine("A contact with this email already exists.");
+                    return;
+                }
+
+                var newContact = new Kontakter(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City);
+                context.Contacts.Add(newContact);
+                context.SaveChanges(); // Save to the database
+                Console.WriteLine($"Kontakt skapad: {newContact}");
             }
         }
 
+        //public void DisplayContacts()
+        //{
+        //    if (_contacts.Count == 0)
+        //    {
+        //        Console.WriteLine("Inga Kontakter");
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine("Kontakt meny");
+        //        var count = 1;
+        //        foreach (var contact in _contacts)
+        //        {
+        //            Console.WriteLine("\n" + count);
+        //            Console.WriteLine(contact);
+        //            count += 1;
+        //        }
+        //    }
+        //}
         public void DisplayContacts()
         {
-            if (_contacts.Count == 0)
+            using (var context = new DataBase())
             {
-                Console.WriteLine("Inga Kontakter");
-            }
-            else
-            {
-                Console.WriteLine("Kontakt meny");
-                var count = 1;
-                foreach (var contact in _contacts)
+                var contacts = context.Contacts.ToList();
+
+                if (contacts.Count == 0)
                 {
-                    Console.WriteLine("\n" + count);
-                    Console.WriteLine(contact);
-                    count += 1;
+                    Console.WriteLine("Inga Kontakter");
+                    return;
+                }
+
+                Console.WriteLine("Kontakt meny:");
+                int count = 1;
+                foreach (var contact in contacts)
+                {
+                    Console.WriteLine($"\n{count}. {contact}");
+                    count++;
                 }
             }
         }
         public void Write(int numb)
         {
-            if (numb >= 0 && numb < _contacts.Count) // ser till att input är giltight. med litte hjälp av AI
-            {
-                Kontakter selected = _contacts[numb];
-                //Console.WriteLine(selected);
-                var tracker = _contacts[numb].ID;
-                string json = JsonSerializer.Serialize(selected);
-                var Path = $@"D:\{tracker}_path.json";
-                Console.WriteLine("Kontakt sparad i D:");
-                File.WriteAllText(Path, json);
-            }
-            //d1afcd29-07e4-4158-8da6-3234db078b2e
-            //foreach (var contact in _contacts)
-            //{
-            //    console.writeline(contact);
-            //    string json = jsonserializer.serialize(contact);
-            //    file.writealltext(@"d:\path.json", json);
-            //}
-            // skapad med hjälp av https://stackoverflow.com/questions/16921652/how-to-write-a-json-file-in-c
+            //Console.WriteLine(numb);
+            //    using (var context = new DataBase()) 
+            //    {
+            //        var contacts = context.Contacts.ToList();
+
+            //        if(numb != contacts.Count)
+            //        {
+            //            return;
+            //        }
+
+            //        var Track = contacts[numb];
+
+            //        if (Console.ReadLine() != null)
+            //        {
+            //            Track.Fornamn = Console.ReadLine();
+            //            context.Contacts.Update(Track);
+            //        }
+            //        else if (Console.ReadLine() == null)
+            //        { }
+            //    }
         }
+
 
         public void Auto()
         {
-            string[] readText = Directory.GetFiles(@"D:\");
-           
-
-            foreach (var x in readText)
+            using (var context = new DataBase())
             {
-               
-               //Console.WriteLine(x.EndsWith("path.json"));
-                if (x.EndsWith("path.json"))
-                {
-                    string finnal = File.ReadAllText(x);
-                    //Console.WriteLine(finnal);
-
-                    finnal = Regex.Replace(finnal, "Fornamn", "");
-                    finnal = Regex.Replace(finnal, "Efternamn", "");
-                    finnal = Regex.Replace(finnal, "Epostadress", "");
-                    finnal = Regex.Replace(finnal, "Telefonnummer", "");
-                    finnal = Regex.Replace(finnal, "Gatuadress", "");
-                    finnal = Regex.Replace(finnal, "Postnummer", "");
-                    finnal = Regex.Replace(finnal, "Ort", "");
-                    finnal = Regex.Replace(finnal, "ID", "");
-                    finnal = Regex.Replace(finnal, ":", "");
-                    finnal = Regex.Replace(finnal, "\"", "");
-                    finnal = Regex.Replace(finnal, "}", "");
-                    finnal = Regex.Replace(finnal, "{", "");
-
-                    List<string> result = finnal.Split(',').ToList();
-
-                    string Name = result[0];
-                    string SecondName = result[1];
-                    string Email = result[2];
-                    string PhoneNumber = result[3];
-                    string Street = result[4];
-                    string PostNumber = result[5];
-                    string City = result[6];
-                    //Console.WriteLine(result[7]);
-                    Guid Id = new(result[7]);
-
-                    AddContact(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City, Id);
-                }
+                var contacts = context.Contacts.ToList();
+                Console.WriteLine($"Loaded {contacts.Count} contacts from database.");
             }
-            /*
-            string readText = File.ReadAllText(@"D:\path.json");
-            readText = Regex.Replace(readText, "Fornamn", "");
-            readText = Regex.Replace(readText, "Efternamn", "");
-            readText = Regex.Replace(readText, "Epostadress", "");
-            readText = Regex.Replace(readText, "Telefonnummer", "");
-            readText = Regex.Replace(readText, "Gatuadress", "");
-            readText = Regex.Replace(readText, "Postnummer", "");
-            readText = Regex.Replace(readText, "Ort", "");
-            readText = Regex.Replace(readText, "ID", "");
-            readText = Regex.Replace(readText, ":", "");
-            readText = Regex.Replace(readText, "\"", "");
-            readText = Regex.Replace(readText, "}", "");
-            readText = Regex.Replace(readText, "{", "");
-
-            List<string> result = readText.Split(',').ToList();
-
-            string Name = result[0];
-            string SecondName = result[1];
-            string Email = result[2];
-            string PhoneNumber = result[3];
-            string Street = result[4];
-            string PostNumber = result[5];
-            string City = result[6];
-            Console.WriteLine(result[7]);
-            Guid Id = new(result[7]);
-            
-            AddContact(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City, Id);
-            */
         }
     }
 }
