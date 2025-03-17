@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System;
 using System.Xml.Linq;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CSharpConsole
 {
@@ -15,13 +16,12 @@ namespace CSharpConsole
         {
             using (var context = new DataBase()) // Connect to the database
             {
-                if (context.Contacts.Any(c => c.Epostadress == Email)) // Check for duplicates
-                {
-                    Console.WriteLine("A contact with this email already exists.");
-                    return;
-                }
 
-                var newContact = new Kontakter(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City);
+                var cacka = context.Contacts.Count();
+
+                string id = $"P-{cacka}";
+
+                var newContact = new Kontakter(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City, id);
                 context.Contacts.Add(newContact);
                 context.SaveChanges(); // Save to the database
                 Console.WriteLine($"Kontakt skapad: {newContact}");
@@ -54,17 +54,28 @@ namespace CSharpConsole
 
                 if (contacts.Count == 0)
                 {
-                    Console.WriteLine("Inga Kontakter");
+                    Console.WriteLine("Inga projekt");
                     return;
                 }
 
-                Console.WriteLine("Kontakt meny:");
+                Console.WriteLine("projekt meny:");
                 int count = 1;
                 foreach (var contact in contacts)
                 {
-                    Console.WriteLine($"\n{count}. {contact}");
+                    Console.WriteLine($"\n{count}. Projektnummer: {contact.ID}, Namn: {contact.Fornamn}, Tidsperiod: {contact.Efternamn} - {contact.Epostadress}, Status: {contact.Ort}");
                     count++;
                 }
+            }
+        }
+        public void DisplayContacts2(int NumbTrack)
+        {
+            using (var context = new DataBase())
+            {
+                var contacts = context.Contacts.ToList();
+
+
+                Console.WriteLine(contacts[NumbTrack]);
+
             }
         }
         public void Write(int numb)

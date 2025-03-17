@@ -5,7 +5,7 @@ namespace CSharpConsole
     public class Kontakter
     {
         [Key]
-        public Guid ID { get; set; } = Guid.NewGuid();
+        public string ID { get; set; }
         public string Fornamn { get; set; }
         public string Efternamn {  get; set; }
         public string Epostadress {  get; set; }
@@ -15,7 +15,7 @@ namespace CSharpConsole
         public string Ort { get; set; }
 
         public Kontakter() { }
-        public Kontakter(string Name, string SecondName, string Email, string PhoneNumber, string Street, string PostNumber, string City)
+        public Kontakter(string Name, string SecondName, string Email, string PhoneNumber, string Street, string PostNumber, string City, string id)
         {
             Fornamn = Name;
             Efternamn = SecondName;
@@ -24,12 +24,12 @@ namespace CSharpConsole
             Gatuadress = Street;
             Postnummer = PostNumber;
             Ort = City;
-            ID = Guid.NewGuid();
+            ID = id;
             
         }
         public override string ToString()
         {
-            return $"ID: {ID}, Name: {Fornamn} {Efternamn}, Email: {Epostadress}, Phone: {Telefonnummer}, Address: {Gatuadress}, {Postnummer}, {Ort}";
+            return $"Projektnumer: {ID} \nName: {Fornamn} \nStartdatum: {Efternamn} \nSlutdatum: {Epostadress} \nprojektansvarig: {Telefonnummer} \nKund: {Gatuadress} \nTjänst: {Postnummer} \nStatus: {Ort}";
         }
     }
 }
