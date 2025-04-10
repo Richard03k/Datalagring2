@@ -3,12 +3,16 @@ using System.Numerics;
 using System.Reflection.Metadata;
 using System.Xml.Linq;
 
+
+
 namespace CSharpConsole
 {
     class Program
     {
         static void Main()
         {
+            var ProjectManager = new ProjectService();
+            var KundManager = new AccountService();
             var manager = new ContactManager();
             manager.Auto();
             bool running = true;
@@ -45,14 +49,13 @@ namespace CSharpConsole
                     string City = Console.ReadLine();
 
                     Console.WriteLine("project skapad " + Name + ", " + SecondName);
-                    manager.AddContact(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City);
+                    ProjectManager.AddProject(Name, SecondName, Email, PhoneNumber, Street, PostNumber, City);
                 }
                 else if (Input == "2")
                 {
                     bool displayloop = true;
                     while (displayloop)
                     {
-
                         manager.Auto();
                         manager.DisplayContacts();
                         Console.WriteLine("\nSkriv in numret för att see projektet");
